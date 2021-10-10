@@ -1,0 +1,128 @@
+---
+version: 1.0
+
+description: |
+  Workflow to test actions
+input:
+  - api_key
+
+output:
+  - org: <% ctx(test_org) %>
+  - net: <% ctx(net_id) %>
+  - devices: <% ctx(devices).select({
+      "model" => $.model,
+      "serial" => $.serial }) %>
+
+tasks:
+  getOrganizations:
+    action: meraki.organizations
+    input:
+      log_level: INFO
+      api_debug: false
+      api_key: <% ctx(api_key) %>
+      api_method: getOrganizations
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - get_orgs: <% result().result.where($.api.get("enabled", false) = true) %>
+          - test_org: <% result().result.where($.name = "Shawn's House").single().id %>
+        do:
+          - getOrganization
+          - getOrganizationNetworks
+  getOrganization:
+    action: meraki.organizations
+    with:
+      items: <% ctx(get_orgs) %>
+    input:
+      log_level: INFO
+      api_debug: false
+      api_key: <% ctx(api_key) %>
+      api_method: getOrganization
+      api_payload:
+        organizationId: <% item().id %>
+    next:
+      - when: <% failed() %>
+        do: noop
+  getOrganizationNetworks:
+    action: meraki.organizations
+    input:
+      log_level: INFO
+      api_debug: false
+      api_key: <% ctx(api_key) %>
+      api_method: getOrganizationNetworks
+      api_payload:
+        organizationId: <% ctx(test_org) %>
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - net_id: <% result().result.where($.name = "Neverland").single().id %>
+        do:
+          - getNetworkDevices
+  getNetworkDevices:
+    action: meraki.networks
+    input:
+      log_level: INFO
+      api_debug: false
+      api_key: <% ctx(api_key) %>
+      api_method: getNetworkDevices
+      api_payload:
+        networkId: <% ctx(net_id) %>
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - devices: <% result().result %>
+  # claimIntoOrganization:
+  #   action: meraki.organizations
+  #   input:
+  #     log_level: INFO
+  #     api_debug: false
+  #     api_key: <% ctx(api_key) %>
+  #     api_method: claimIntoOrganization
+  #   api_payload:
+  #     organizationID: <% ctx(org_id) %>
+  #     serials: <% ctx(list_serials) %>
+  # claimNetworkDevices:
+  #   action: meraki.networks
+  #   input:
+  #     log_level: INFO
+  #     api_debug: false
+  #     api_key: <% ctx(api_key) %>
+  #     api_method: claimNetworkDevices
+  #     api_payload:
+  #       networkId: <% ctx(net_id) %>
+  #       serials:
+  #         - Switch1_sn: <% ctx(switch1) %>
+  #         - Switch2_SN: <% ctx(switch2) %>
+  # getOrganizationConfigTemplates:
+  #   action: meraki.organizations
+  #   input:
+  #     log_level: INFO
+  #     api_debug: false
+  #     api_key: <% ctx(api_key) %>
+  #     api_method: getOrganizationConfigTemplates
+  #     api_payload:
+  #       organizationId: <% ctx(org_id) %>
+  # updateDevice:
+  #   action: meraki.devices
+  #   input:
+  #     log_level: INFO
+  #     api_debug: false
+  #     api_key: <% ctx(api_key) %>
+  #     api_method: updateDevice
+  #     api_payload:
+  #       serial: <% ctx(switch_serial) %>
+  #       name: <% ctx(switch_name) %>
+  #       switchProfileId:
+  # createOrganizationActionBatch:
+  #   action: meraki.organizations
+  #   input:
+  #     log_level: INFO
+  #     api_debug: false
+  #     api_key: <% ctx(api_key) %>
+  #     api_method: createOrganizationActionBatch
+  #     api_payload:
+  #       organizationId: <% ctx(org_id) %>
+  #       actions:
+  #         - resource: /devices/QXXX-XXXX-XXXX/switch/ports/3
+  #       confirmed: true
+  #       synchronous: false

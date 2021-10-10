@@ -1,0 +1,12 @@
+---
+name: test_org_get
+description: |
+  Workflow to test org get calls
+runner_type: orquesta
+entry_point: workflows/test_org_get.yaml
+enabled: true
+parameters:
+  api_key:
+    required: true
+    type: string
+    description: api key for dashboard

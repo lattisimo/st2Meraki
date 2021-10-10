@@ -1,0 +1,11 @@
+---
+Host:
+  default: api.meraki.com
+  description: Meraki dashboard API enpoint
+  required: true
+  type: string
+BasePath:
+  default: api/v1
+  description: Base API version path
+  required: true
+  type: string

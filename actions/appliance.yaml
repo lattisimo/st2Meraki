@@ -1,0 +1,29 @@
+---
+name: appliance
+description: Generic appliance command
+runner_type: python-script
+enabled: true
+entry_point: dashboard.py
+parameters:
+  api_module:
+    default: appliance
+    required: true
+    immutable: true
+  api_debug:
+    default: false
+    description: output api logging to console
+    required: false
+    type: boolean
+  api_key:
+    description: api key to authenticate with
+    required: true
+    secret: true
+    type: string
+  api_method:
+    description: python module method
+    required: true
+    type: string
+  api_payload:
+    description: arguments to pass
+    required: false
+    type: object

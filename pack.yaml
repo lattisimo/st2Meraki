@@ -1,0 +1,12 @@
+---
+ref: st2meraki
+name: st2Meraki
+description: Meraki API via meraki python package
+keywords:
+  - meraki
+  - cisco
+version: 0.0.1
+python_versions:
+  - "3"
+author: Shawn Robinson
+email: shawn.robinson@sagenet.com
